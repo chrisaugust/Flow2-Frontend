@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+ 
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+
+# Local environment variables
+.env
+.env.development
+.env.production
+.env.local
+.env.*.local
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Optional: lock files if you don't want them in git (usually keep them!)
+# package-lock.json
+# yarn.lock
+
+# Optional: npm / pnpm / yarn cache folders
+.npm/
+.pnpm-store/
+.yarn/cache/
+
+# Misc
+*.log

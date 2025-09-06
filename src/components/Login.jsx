@@ -6,10 +6,13 @@ const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       const res = await api.post('/login', { email, password });
@@ -25,33 +28,48 @@ const Login = ({ onLogin }) => {
       console.error('Login error:', err);
       const apiErrors = err.response?.data?.errors;
       setError(apiErrors ? apiErrors.join(', ') : err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="p-6 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Login</h1>
 
-      <form onSubmit={handleLogin}>
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={e => setEmail(e.target.value)} 
-          required 
-        />
-        <br />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          required 
-        />
-        <br />
-        <button type="submit">Log In</button>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label className="block mb-1">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full border p-2 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full border p-2 rounded"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-500 text-white py-2 rounded"
+        >
+          {loading ? 'Logging In...' : 'Log In'}
+        </button>
       </form>
+
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };

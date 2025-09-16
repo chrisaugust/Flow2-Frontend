@@ -114,7 +114,15 @@ const MonthlyReview = () => {
       >
         Rebuild Review
       </button>
-
+      <hr></hr>
+      <p>In reviewing the following category totals, ask yourself these three questions:</p>
+      <p>1) Did I exchange my life energy for a proportional amount of fulfillment, satisfaction, and value?</p>
+      <p>2) Is this expenditure of life energy aligned with my values and life purpose?</p>
+      <p>3) How might this pattern of spending change if I were financially independent (FI), and did not need to work for a living? In other words, would it change post-FI?</p>
+      <p>In answering these questions, mark a '-' to indicate that the value or fulfillment received was not proportional to the life energy spent, or if the spending was not in alignment with values and purpose, or if you would spend less in this category post-FI.</p>
+      <p>Mark a '+' if increasing spending would provide more value/fulfillment, would demonstrate greater personal alignment, or would increase post-FI.</p>
+      <p>Mark a '0' if spending for the category is fine as it currently stands.</p>
+      <hr></hr>
       <h3 className="mt-6 text-xl font-semibold">Category Reviews:</h3>
       {review.monthly_category_reviews.map((catReview) => (
         <MonthlyCategoryReviewItem

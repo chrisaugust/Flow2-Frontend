@@ -13,7 +13,8 @@ import CategoriesList from './components/CategoriesList';
 import CategoryExpenses from './components/CategoryExpenses';
 import MonthlyReview from "./components/MonthlyReview";
 import MonthlyReviewList from './components/MonthlyReviewList';
-
+import UserProfile from './components/UserProfile';
+import PasswordReset from './components/PasswordReset';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -88,6 +89,11 @@ function App() {
           path="/monthly_reviews/by_month_code/:month_code" 
           element={token ? <MonthlyReview token={token} />: <Navigate to="/login" />} 
         />
+        <Route
+          path="/profile"
+          element={token ? <UserProfile token={token} />: <Navigate to="/login" />}
+        />
+        <Route path="/reset-password" element={<PasswordReset />} />
 
       </Routes>
     </Router>

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -60,6 +62,8 @@ const Login = ({ onLogin }) => {
           />
         </div>
 
+        <button onClick={() => setShowForgot(true)}>Forgot Password?</button>
+
         <button
           type="submit"
           disabled={loading}
@@ -68,6 +72,8 @@ const Login = ({ onLogin }) => {
           {loading ? 'Logging In...' : 'Log In'}
         </button>
       </form>
+
+      {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>

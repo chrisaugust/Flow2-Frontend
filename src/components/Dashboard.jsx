@@ -89,7 +89,6 @@ function getMonthlyIncomeTotal(incomes, currentMonth) {
   return total.toFixed(2);
 }
 
-
 const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [expenses, setExpenses] = useState([]);

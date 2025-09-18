@@ -3,7 +3,6 @@ import api from '../services/api';
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
-  const [email, setEmail] = useState('');
   const [loadingUser, setLoadingUser] = useState(true);
 
   const [passwordData, setPasswordData] = useState({
@@ -19,7 +18,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         if (!token) {
           setLoadingUser(false);
           return;
@@ -30,7 +29,6 @@ const UserProfile = () => {
 
         const res = await api.get(`/users/${userId}`);
         setUser(res.data);
-        setEmail(res.data.email || '');
       } catch (err) {
         console.error('Error decoding token or fetching user:', err);
       } finally {
@@ -128,7 +126,7 @@ const UserProfile = () => {
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Email
             </label>
-            <p>{email}</p>
+            <p>{user.email}</p>
           </div>
         </div>
       )}

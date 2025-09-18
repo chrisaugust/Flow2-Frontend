@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-//import './PasswordReset.css';
 
 const PasswordReset = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
   
-  const [passwordData, setPasswordData] = useState({
-    password: '',
-    confirmPassword: ''
-  });
+  const [passwordData, setPasswordData] = useState({ password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [validationErrors, setValidationErrors] = useState({});
@@ -27,48 +23,27 @@ const PasswordReset = () => {
 
   const validatePassword = (password) => {
     const errors = {};
-    
-    if (password.length < 8) {
-      errors.length = 'Password must be at least 8 characters long';
-    }
-    if (!/(?=.*[a-z])/.test(password)) {
-      errors.lowercase = 'Password must contain at least one lowercase letter';
-    }
-    if (!/(?=.*[A-Z])/.test(password)) {
-      errors.uppercase = 'Password must contain at least one uppercase letter';
-    }
-    if (!/(?=.*\d)/.test(password)) {
-      errors.number = 'Password must contain at least one number';
-    }
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.special = 'Password must contain at least one special character (@$!%*?&)';
-    }
+    if (password.length < 8) errors.length = true;
+    if (!/(?=.*[a-z])/.test(password)) errors.lowercase = true;
+    if (!/(?=.*[A-Z])/.test(password)) errors.uppercase = true;
+    if (!/(?=.*\d)/.test(password)) errors.number = true;
+    if (!/(?=.*[@$!%*?&])/.test(password)) errors.special = true;
     return errors;
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
+    setPasswordData(prev => ({ ...prev, [name]: value }));
     setMessage({ type: '', text: '' });
-    
-    if (name === 'password') {
-      const errors = validatePassword(value);
-      setValidationErrors(errors);
-    }
-    
+
+    if (name === 'password') setValidationErrors(validatePassword(value));
+
     if (name === 'confirmPassword' || name === 'password') {
       const newPass = name === 'password' ? value : passwordData.password;
       const confirmPass = name === 'confirmPassword' ? value : passwordData.confirmPassword;
-      
+
       if (confirmPass && newPass !== confirmPass) {
-        setValidationErrors(prev => ({
-          ...prev,
-          confirmation: 'Passwords do not match'
-        }));
+        setValidationErrors(prev => ({ ...prev, confirmation: true }));
       } else {
         setValidationErrors(prev => {
           const { confirmation, ...rest } = prev;
@@ -80,15 +55,10 @@ const PasswordReset = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const passwordErrors = validatePassword(passwordData.password);
-    if (Object.keys(passwordErrors).length > 0) {
-      setValidationErrors(passwordErrors);
-      return;
-    }
-
-    if (passwordData.password !== passwordData.confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match' });
+    const errors = validatePassword(passwordData.password);
+    if (Object.keys(errors).length > 0 || passwordData.password !== passwordData.confirmPassword) {
+      setValidationErrors(errors);
+      setMessage({ type: 'error', text: 'Please fix the password errors' });
       return;
     }
 
@@ -96,67 +66,42 @@ const PasswordReset = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await api.post('/reset_password', {
+      const res = await api.post('/reset_password', {
         token,
         password: passwordData.password,
         password_confirmation: passwordData.confirmPassword
       });
 
-      const data = response.data;
-      
-      if (data?.token) {
-       localStorage.setItem('token', data.token);
-      }
-       
+      if (res.data?.token) localStorage.setItem('token', res.data.token);
+
       setResetSuccess(true);
-      setMessage({ 
-         type: 'success', 
-         text: data.message || 'Password reset successfully! Redirecting to dashboard...' 
-      });
-        
-      // Redirect to dashboard or profile since user is now logged in
+      setMessage({ type: 'success', text: res.data.message || 'Password reset successfully! Redirecting...' });
+
       setTimeout(() => {
-        if (data?.token) {
-          navigate('/dashboard'); // or wherever your main app starts
-        } else {
-          navigate('/login');
-        }
+        navigate(res.data?.token ? '/dashboard' : '/login');
       }, 2000);
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.errors?.join('. ') ||
-        error.response?.data?.error ||
-        'Failed to reset password';
-
-      if (errorMessage.includes('expired') || errorMessage.includes('Invalid')) {
-        setTokenValid(false);
-      }
-
-      setMessage({ type: 'error', text: errorMessage });
+    } catch (err) {
+      const errorMsg = err.response?.data?.errors?.join('. ') || err.response?.data?.error || 'Failed to reset password';
+      if (errorMsg.includes('expired') || errorMsg.includes('Invalid')) setTokenValid(false);
+      setMessage({ type: 'error', text: errorMsg });
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormValid = () => {
-    return passwordData.password && 
-           passwordData.confirmPassword &&
-           Object.keys(validationErrors).length === 0 &&
-           tokenValid &&
-           !resetSuccess;
-  };
+  const isFormValid = () =>
+    passwordData.password && passwordData.confirmPassword && Object.keys(validationErrors).length === 0 && tokenValid && !resetSuccess;
 
   if (!tokenValid) {
     return (
-      <div className="password-reset-container">
-        <div className="reset-form">
-          <h2>Reset Password</h2>
-          <div className="message error">
-            This password reset link is invalid or has expired (links expire after 2 hours). 
-            Please request a new one.
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+        <div className="bg-white shadow-md rounded-xl p-6 w-full max-w-md text-center">
+          <h2 className="text-2xl font-semibold mb-4">Reset Password</h2>
+          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+            This password reset link is invalid or has expired. Please request a new one.
           </div>
-          <button 
-            className="btn-primary"
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
             onClick={() => navigate('/login')}
           >
             Back to Login
@@ -167,70 +112,59 @@ const PasswordReset = () => {
   }
 
   return (
-    <div className="password-reset-container">
-      <div className="reset-form">
-        <h2>Reset Your Password</h2>
-        
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+      <div className="bg-white shadow-md rounded-xl p-6 w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-6 text-center">Reset Your Password</h2>
+
         {message.text && (
-          <div className={`message ${message.type}`}>
+          <div className={`p-3 mb-4 rounded ${message.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
             {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="password">New Password</label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-1">New Password</label>
             <input
               type="password"
               id="password"
               name="password"
               value={passwordData.password}
               onChange={handleInputChange}
-              required
               disabled={loading || resetSuccess}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
-            
             {passwordData.password && (
-              <div className="password-requirements">
-                <div className={`requirement ${!validationErrors.length ? 'valid' : 'invalid'}`}>
-                  ✓ At least 8 characters
-                </div>
-                <div className={`requirement ${!validationErrors.lowercase ? 'valid' : 'invalid'}`}>
-                  ✓ One lowercase letter
-                </div>
-                <div className={`requirement ${!validationErrors.uppercase ? 'valid' : 'invalid'}`}>
-                  ✓ One uppercase letter
-                </div>
-                <div className={`requirement ${!validationErrors.number ? 'valid' : 'invalid'}`}>
-                  ✓ One number
-                </div>
-                <div className={`requirement ${!validationErrors.special ? 'valid' : 'invalid'}`}>
-                  ✓ One special character
-                </div>
+              <div className="mt-2 space-y-1 text-sm">
+                <div className={`flex items-center ${!validationErrors.length ? 'text-green-600' : 'text-red-600'}`}>✓ At least 8 characters</div>
+                <div className={`flex items-center ${!validationErrors.lowercase ? 'text-green-600' : 'text-red-600'}`}>✓ One lowercase letter</div>
+                <div className={`flex items-center ${!validationErrors.uppercase ? 'text-green-600' : 'text-red-600'}`}>✓ One uppercase letter</div>
+                <div className={`flex items-center ${!validationErrors.number ? 'text-green-600' : 'text-red-600'}`}>✓ One number</div>
+                <div className={`flex items-center ${!validationErrors.special ? 'text-green-600' : 'text-red-600'}`}>✓ One special character</div>
+                {validationErrors.confirmation && <div className="text-red-600">Passwords do not match</div>}
               </div>
             )}
           </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
               value={passwordData.confirmPassword}
               onChange={handleInputChange}
-              required
               disabled={loading || resetSuccess}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
-            {validationErrors.confirmation && (
-              <div className="error-text">{validationErrors.confirmation}</div>
-            )}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!isFormValid() || loading}
-            className="btn-primary"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Resetting Password...' : 'Reset Password'}
           </button>

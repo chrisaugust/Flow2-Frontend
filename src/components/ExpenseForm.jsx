@@ -13,7 +13,7 @@ const ExpenseForm = () => {
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState([]);
 
-  const { id } = useParams(); // if present, we're in edit mode
+  const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
@@ -21,7 +21,6 @@ const ExpenseForm = () => {
     isEditMode ? '' : new Date().toISOString().slice(0, 10)
   );
 
-  // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -32,11 +31,9 @@ const ExpenseForm = () => {
         setErrors(['Could not load categories']);
       }
     };
-
     fetchCategories();
   }, []);
 
-  // Load expense if editing
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -53,20 +50,12 @@ const ExpenseForm = () => {
         setErrors(['Failed to load expense.']);
       }
     };
-
     fetchExpense();
   }, [id, isEditMode]);
 
-  // Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      description,
-      amount,
-      category_id: categoryId,
-      occurred_on: occurredOn
-    };
+    const payload = { description, amount, category_id: categoryId, occurred_on: occurredOn };
 
     try {
       if (isEditMode) {
@@ -74,75 +63,78 @@ const ExpenseForm = () => {
       } else {
         await api.post('/expenses', { expense: payload });
       }
-
       navigate(`/categories/${categoryId}/expenses`);
     } catch (err) {
       console.error('Error saving expense:', err);
-
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
-      } else {
-        setErrors(['Something went wrong.']);
-      }
+      if (err.response?.data?.errors) setErrors(err.response.data.errors);
+      else setErrors(['Something went wrong.']);
     }
   };
 
   return (
-    <div>
-      <h2>{isEditMode ? 'Edit Expense' : 'Add New Expense'}</h2>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow-md mt-6">
+      <h2 className="text-2xl font-semibold mb-6 text-center">{isEditMode ? 'Edit Expense' : 'Add New Expense'}</h2>
 
       {errors.length > 0 && (
-        <div style={{ color: 'red' }}>
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
           {errors.map((e, i) => <p key={i}>{e}</p>)}
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label>Description:</label><br />
+          <label className="block text-sm font-medium mb-1">Description</label>
           <input
             type="text"
             value={description}
             onChange={e => setDescription(e.target.value)}
             required
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
         <div>
-          <label>Amount:</label><br />
+          <label className="block text-sm font-medium mb-1">Amount</label>
           <input
             type="number"
             value={amount}
             onChange={e => setAmount(e.target.value)}
             required
             step="0.01"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
         <div>
-          <label>Category:</label><br />
+          <label className="block text-sm font-medium mb-1">Category</label>
           <select
             value={categoryId}
             onChange={e => setCategoryId(e.target.value)}
             required
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a category</option>
             {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
         </div>
+
         <div>
-          <label>Date:</label><br />
+          <label className="block text-sm font-medium mb-1">Date</label>
           <input
             type="date"
             value={occurredOn}
             onChange={e => setOccurredOn(e.target.value)}
             required
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <button type="submit">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           {isEditMode ? 'Update Expense' : 'Create Expense'}
         </button>
       </form>

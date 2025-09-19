@@ -64,15 +64,16 @@ const Dashboard = () => {
   const [wageSaving, setWageSaving] = useState(false);
   const [wageError, setWageError] = useState('');
 
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+
   const navigate = useNavigate();
-  const currentMonth = new Date();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [catRes, expRes, incRes] = await Promise.all([
           api.get('/categories'),
-          api.get('/expenses'),
+          api.get('/expenses', { params: { month: selectedMonth.getMonth() + 1, year: selectedMonth.getFullYear() } }),
           api.get('/incomes')
         ]);
 
@@ -97,12 +98,12 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedMonth]);
 
   const handleMonthlyReview = async () => {
     try {
       const res = await api.post('/monthly_reviews', {
-        month: currentMonth.toISOString().slice(0, 10)
+        month: selectedMonth.toISOString().slice(0, 10)
       });
       navigate(`/monthly_reviews/by_month_code/${res.data.month_code}`);
     } catch (err) {
@@ -113,8 +114,8 @@ const Dashboard = () => {
 
   if (loading) return <p>Loading...</p>;
 
-  const { categorySubtotals, grandTotal } = getCategorySubtotals(expenses, categories, currentMonth);
-  const totalIncome = getMonthlyIncomeTotal(incomes, currentMonth);
+  const { categorySubtotals, grandTotal } = getCategorySubtotals(expenses, categories, selectedMonth);
+  const totalIncome = getMonthlyIncomeTotal(incomes, selectedMonth);
 
   const sortedSubtotals = [...categorySubtotals].sort((a, b) =>
     a.category.localeCompare(b.category, undefined, { sensitivity: 'base' })
@@ -147,6 +148,20 @@ const Dashboard = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      
+      {/* Month Picker */}
+      <div className="mb-6">
+        <label className="font-semibold mr-2">Select Month:</label>
+        <input
+          type="month"
+          value={`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`}
+          onChange={(e) => {
+            const [year, month] = e.target.value.split('-').map(Number);
+            setSelectedMonth(new Date(year, month - 1, 1));
+          }}
+          className="border p-2 rounded"
+        />
+      </div>
 
       {/* Hourly Wage editor */}
       {user && (
@@ -172,7 +187,7 @@ const Dashboard = () => {
       )}
 
       <h2 className="text-xl font-semibold mb-2">
-        {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}:
+        {selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}:
       </h2>
 
       <ul>

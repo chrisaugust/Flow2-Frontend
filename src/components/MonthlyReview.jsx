@@ -62,7 +62,7 @@ const MonthlyReview = () => {
     }, 500); // save after 0.5 seconds of inactivity
 
     return () => clearTimeout(handler); // cancel if notes change again
-  }, [review.notes, saveNotes]);
+  }, [review?.notes, saveNotes]);
 
   const handleNotesChange = (e) => {
     const newNotes = e.target.value;

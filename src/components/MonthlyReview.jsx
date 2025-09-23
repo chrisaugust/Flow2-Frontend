@@ -21,8 +21,15 @@ const MonthlyReview = () => {
         api.get(`/monthly_reviews/by_month_code/${month_code}`),
       ]);
 
+      // Ensure monthly_category_reviews always exists
+      const reviewData = {
+        ...reviewRes.data,
+        monthly_category_reviews: reviewRes.data.monthly_category_reviews || [],
+      };
+
       setCategories(catRes.data);
-      setReview(reviewRes.data);
+      setReview(reviewData);
+      setLastSavedNotes(reviewData.notes || "");
       setError(null);
     } catch (err) {
       console.error("Error fetching review:", err);
@@ -36,22 +43,28 @@ const MonthlyReview = () => {
     fetchReviewAndCategories();
   }, [month_code]);
 
+  const saveNotes = useCallback(
+    async (notesToSave) => {
+      if (!review || notesToSave === lastSavedNotes || !notesToSave?.trim()) return;
 
-  const saveNotes = useCallback(async (notesToSave) => {
-    if (!review || notesToSave === lastSavedNotes) return;
-
-    try {
-      setSaving(true);
-      const res = await api.patch(`/monthly_reviews/${review.id}`, { notes: notesToSave });
-      setReview(res.data);
-      setLastSavedNotes(notesToSave);
-    } catch (err) {
-      console.error("Error saving notes:", err);
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setSaving(false);
-    }
-  }, [review, lastSavedNotes]);
+      try {
+        setSaving(true);
+        const res = await api.patch(`/monthly_reviews/${review.id}`, { notes: notesToSave });
+        setReview((prev) => ({
+          ...prev,
+          ...res.data,
+          monthly_category_reviews: res.data.monthly_category_reviews || [],
+        }));
+        setLastSavedNotes(notesToSave);
+      } catch (err) {
+        console.error("Error saving notes:", err);
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [review, lastSavedNotes]
+  );
 
   // Debounced auto-save effect
   useEffect(() => {
@@ -59,9 +72,9 @@ const MonthlyReview = () => {
 
     const handler = setTimeout(() => {
       saveNotes(review.notes);
-    }, 500); // save after 0.5 seconds of inactivity
+    }, 500); // save after 0.5s of inactivity
 
-    return () => clearTimeout(handler); // cancel if notes change again
+    return () => clearTimeout(handler);
   }, [review?.notes, saveNotes]);
 
   const handleNotesChange = (e) => {
@@ -70,6 +83,8 @@ const MonthlyReview = () => {
   };
 
   const handleRebuild = async () => {
+    if (!review) return;
+
     try {
       await api.post(`/monthly_reviews/${review.id}/rebuild`);
       fetchReviewAndCategories();
@@ -80,6 +95,9 @@ const MonthlyReview = () => {
   };
 
   const handleToggleComplete = async () => {
+    if (!review) return;
+
+    // Save pending notes before marking complete
     if (review.notes !== lastSavedNotes) {
       await saveNotes(review.notes);
     }
@@ -89,7 +107,13 @@ const MonthlyReview = () => {
         notes: review.notes,
         completed: !review.completed,
       });
-      setReview(res.data);
+
+      setReview((prev) => ({
+        ...prev,
+        ...res.data,
+        monthly_category_reviews: res.data.monthly_category_reviews || [],
+      }));
+
       if (res.data.completed) navigate("/monthly_reviews");
     } catch (err) {
       console.error("Error saving review:", err);
@@ -125,19 +149,23 @@ const MonthlyReview = () => {
       >
         Rebuild Review
       </button>
-      <hr></hr>
+
+      <hr className="my-4" />
+
       <p>In reviewing the following category totals, ask yourself these three questions:</p>
-      <br></br>
+      <br />
       <p>1) <em>Did I exchange my life energy for a proportional amount of fulfillment, satisfaction, and value?</em></p>
       <p>2) <em>Is this expenditure of life energy aligned with my values and life purpose?</em></p>
       <p>3) <em>How might this pattern of spending change if I were financially independent (FI), and did not need to work for a living? In other words, would it change post-FI?</em></p>
-      <br></br>
+      <br />
       <p>In answering these questions, mark a '-' to indicate that the value or fulfillment received was not proportional to the life energy spent, or if the spending was not in alignment with values and purpose, or if you would spend less in this category post-FI.</p>
       <p>Mark a '+' if increasing spending would provide more value/fulfillment, would demonstrate greater personal alignment, or would increase post-FI.</p>
       <p>Mark a '0' if spending for the category is fine as it currently stands.</p>
-      <hr></hr>
+
+      <hr className="my-4" />
+
       <h3 className="mt-6 text-xl font-semibold">Category Reviews:</h3>
-      {review.monthly_category_reviews.map((catReview) => (
+      {review.monthly_category_reviews?.map((catReview) => (
         <MonthlyCategoryReviewItem
           key={catReview.id}
           reviewItem={catReview}

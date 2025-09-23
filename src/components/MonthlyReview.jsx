@@ -54,10 +54,20 @@ const MonthlyReview = () => {
     [review]
   );
 
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!review) return;
+
+    const handler = setTimeout(() => {
+      saveNotes(review.notes);
+    }, 5000); // save after 5 seconds of inactivity
+
+    return () => clearTimeout(handler); // cancel if notes change again
+  }, [review.notes, saveNotes]);
+
   const handleNotesChange = (e) => {
     const newNotes = e.target.value;
-    setReview(prev => ({ ...prev, notes: newNotes }));
-    saveNotes(newNotes);
+    setReview((prev) => ({ ...prev, notes: newNotes }));
   };
 
   const handleRebuild = async () => {

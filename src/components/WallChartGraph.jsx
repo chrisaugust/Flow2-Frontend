@@ -88,7 +88,8 @@ const WallChartGraph = ({ expenses, incomes, categories }) => {
     borderColor: 'red',
     backgroundColor: 'rgba(255, 0, 0, 0.88)',
     tension: 0.3,
-    fill: false
+    fill: false,
+    yAxisID: 'yLines'
   };
 
   const totalIncomeDataset = {
@@ -98,7 +99,8 @@ const WallChartGraph = ({ expenses, incomes, categories }) => {
     borderColor: 'green',
     backgroundColor: 'rgba(14, 159, 14, 0.95)',
     tension: 0.3,
-    fill: false
+    fill: false,
+    yAxisID: 'yLines'
   };
 
   const chartData = {
@@ -114,7 +116,8 @@ const WallChartGraph = ({ expenses, incomes, categories }) => {
       y: { 
         stacked: true, // stack bars vertically
         beginAtZero: true 
-      }
+      }, //bars
+      yLines: { stacked: false, beginAtZero: true, position: 'right' } // lines
     }
   };
 

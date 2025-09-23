@@ -2,8 +2,6 @@
 import { Chart } from 'react-chartjs-2';
 import ChartJS from 'chart.js/auto';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Legend, Tooltip);
-
 function extractYearMonth(dateStr) {
   return {
     year: parseInt(dateStr.slice(0, 4), 10),

@@ -2,14 +2,7 @@ import api from '../services/api';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import 'chart.js/auto'; 
 
 // Calculate category subtotals safely
 function getCategorySubtotals(expenses, categories, currentMonth) {

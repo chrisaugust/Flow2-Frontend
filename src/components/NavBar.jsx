@@ -95,7 +95,7 @@ const NavBar = ({ token, onLogout }) => {
             <NavLink to="/incomes" className="hover:bg-brand-dark text-slate-700 rounded py-2 px-4 mt-2">Incomes</NavLink>
             <NavLink to="/categories" className="hover:bg-brand-dark text-slate-700 rounded py-2 px-4 mt-2">Categories</NavLink>
             <NavLink to="/monthly_reviews" className="hover:bg-brand-dark text-slate-700 rounded py-2 px-4 mt-2">Monthly Reviews</NavLink>
-
+            <NavLink to="/wall-chart" className="hover:bg-brand-dark text-slate-700 rounded py-2 px-4 mt-2">Wall Chart</NavLink>
             {token ? (
               <>
                 <button

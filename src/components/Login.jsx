@@ -71,6 +71,18 @@ const Login = ({ onLogin }) => {
         >
           {loading ? 'Logging In...' : 'Log In'}
         </button>
+
+        <br></br>
+        <br></br>
+        <p>Don't have an account yet, but would like to sign up?</p>
+        <button
+          type="button"
+          disabled={loading}
+          className="w-full bg-green-500 text-white py-2 rounded"
+          onClick={() => navigate("/register")}
+        >
+          Sign Up
+        </button>
       </form>
 
       {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}

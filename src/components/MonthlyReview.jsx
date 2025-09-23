@@ -10,6 +10,7 @@ const MonthlyReview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [lastSavedNotes, setLastSavedNotes] = useState("");
   const navigate = useNavigate();
 
   const fetchReviewAndCategories = async () => {
@@ -35,24 +36,22 @@ const MonthlyReview = () => {
     fetchReviewAndCategories();
   }, [month_code]);
 
-  const saveNotes = useCallback(
-    async (newNotes) => {
-      if (!review) return;
-      try {
-        setSaving(true);
-        const res = await api.patch(`/monthly_reviews/${review.id}`, {
-          notes: newNotes,
-        });
-        setReview(res.data);
-      } catch (err) {
-        console.error("Error saving notes:", err);
-        setError(err.response?.data?.message || err.message);
-      } finally {
-        setSaving(false);
-      }
-    },
-    [review]
-  );
+
+  const saveNotes = useCallback(async (notesToSave) => {
+    if (!review || notesToSave === lastSavedNotes) return;
+
+    try {
+      setSaving(true);
+      const res = await api.patch(`/monthly_reviews/${review.id}`, { notes: notesToSave });
+      setReview(res.data);
+      setLastSavedNotes(notesToSave);
+    } catch (err) {
+      console.error("Error saving notes:", err);
+      setError(err.response?.data?.message || err.message);
+    } finally {
+      setSaving(false);
+    }
+  }, [review, lastSavedNotes]);
 
   // Debounced auto-save effect
   useEffect(() => {
@@ -60,7 +59,7 @@ const MonthlyReview = () => {
 
     const handler = setTimeout(() => {
       saveNotes(review.notes);
-    }, 5000); // save after 5 seconds of inactivity
+    }, 500); // save after 0.5 seconds of inactivity
 
     return () => clearTimeout(handler); // cancel if notes change again
   }, [review.notes, saveNotes]);
@@ -81,15 +80,17 @@ const MonthlyReview = () => {
   };
 
   const handleToggleComplete = async () => {
+    if (review.notes !== lastSavedNotes) {
+      await saveNotes(review.notes);
+    }
+
     try {
       const res = await api.patch(`/monthly_reviews/${review.id}`, {
         notes: review.notes,
         completed: !review.completed,
       });
       setReview(res.data);
-      if (res.data.completed) {
-        navigate("/monthly_reviews");
-      }
+      if (res.data.completed) navigate("/monthly_reviews");
     } catch (err) {
       console.error("Error saving review:", err);
       setError(err.response?.data?.message || err.message);

@@ -77,7 +77,8 @@ const WallChartGraph = ({ expenses, incomes, categories }) => {
     type: 'bar',
     label: catName,
     data: totals,
-    backgroundColor: `hsl(${(idx * 60) % 360}, 70%, 50%)`
+    backgroundColor: `hsl(${(idx * 60) % 360}, 70%, 50%)`,
+    stack: 'expenses'
   }));
 
   const totalExpensesDataset = {

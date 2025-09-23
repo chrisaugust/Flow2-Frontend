@@ -31,6 +31,7 @@ const NavBar = ({ token, onLogout }) => {
             <NavLink to="/incomes" className={navLinkClass}>Incomes</NavLink>
             <NavLink to="/categories" className={navLinkClass}>Categories</NavLink>
             <NavLink to="/monthly_reviews" className={navLinkClass}>Monthly Reviews</NavLink>
+            <NavLink to="/wall-chart" className={navLinkClass}>Wall Chart</NavLink>
           </div>
 
           {/* Right links */}

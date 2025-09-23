@@ -15,6 +15,7 @@ import MonthlyReview from "./components/MonthlyReview";
 import MonthlyReviewList from './components/MonthlyReviewList';
 import UserProfile from './components/UserProfile';
 import PasswordReset from './components/PasswordReset';
+import WallChartPage from './components/WallChartPage';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -94,6 +95,11 @@ function App() {
           element={token ? <UserProfile token={token} />: <Navigate to="/login" />}
         />
         <Route path="/reset-password" element={<PasswordReset />} />
+
+        <Route 
+          path="/wall-chart" 
+          element={token ? <WallChartPage token={token} /> : <Navigate to="/login" />} 
+        />
 
       </Routes>
     </Router>

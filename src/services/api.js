@@ -10,9 +10,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  
-  // Don't attach token for signup or login
-  if (token && !["/signup", "/login"].includes(config.url)) {
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 

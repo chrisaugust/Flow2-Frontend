@@ -76,18 +76,6 @@ const Login = ({ onLogin }) => {
       {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
-
-      <br></br>
-      <br></br>
-      <p>Don't have an account yet, but would like to sign up?</p>
-      <button
-        type="button"
-        disabled={loading}
-        onClick={()=> navigate("/signup")}
-        className="w-full bg-green-500 text-white py-2 rounded"
-      >
-        Sign Up
-      </button>
     </div>
   );
 };

@@ -85,6 +85,12 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
+        if (err.response && err.response.status === 401) {
+          if (window.confirm('Your session has expired. Please log in again.')) {
+            localStorage.removeItem('token');
+            navigate('/login');
+          }
+        }
       } finally {
         setLoading(false);
       }
